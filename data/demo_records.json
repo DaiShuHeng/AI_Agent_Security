@@ -1,0 +1,197 @@
+[
+  {
+    "external_id": "GHSA-8hqg-whrw-pv92",
+    "title": "CVE-2024-37032：Ollama 模型摘要路径校验缺失",
+    "summary": "GitHub 安全公告指出，Ollama 0.1.34 之前的版本在获取模型路径时未充分校验 sha256 摘要格式。公告将 0.1.34 列为修复版本。",
+    "body": "该问题涉及模型摘要的格式验证，异常摘要可能影响模型文件路径的处理。此记录只归纳 GitHub 安全公告已确认的受影响版本与修复版本；具体部署条件下的进一步影响见同一 CVE 的 Wiz Research 分析文章。",
+    "url": "https://github.com/advisories/GHSA-8hqg-whrw-pv92",
+    "published_at": "2024-05-31",
+    "updated_at": "2024-09-06",
+    "source_id": "github_advisories",
+    "source_category": "github_advisories",
+    "kind": "vulnerability",
+    "identifiers": ["CVE-2024-37032", "GHSA-8hqg-whrw-pv92"],
+    "product": "ollama",
+    "cvss": null,
+    "severity": "Moderate",
+    "versions": ["< 0.1.34"],
+    "fixed_versions": ["0.1.34"],
+    "refs": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-37032",
+      "https://github.com/ollama/ollama/issues/4175",
+      "https://www.wiz.io/blog/probllama-ollama-vulnerability-cve-2024-37032"
+    ],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "GitHub Advisory Database",
+      "verified_on": "2026-09-29",
+      "note": "GitHub 公告显示 Moderate，未在该公告页面查到可直接引用的 CVSS 数值，因此留空。"
+    }
+  },
+  {
+    "external_id": "GHSA-56xg-wfcc-g829",
+    "title": "CVE-2024-34359：llama-cpp-python 模型元数据模板注入",
+    "summary": "上游安全公告确认，llama-cpp-python 0.2.30 至 0.2.71 在处理模型元数据中的聊天模板时存在服务端模板注入风险，0.2.72 为修复版本。",
+    "body": "在特定模型元数据被加载并渲染的条件下，缺乏沙箱约束的 Jinja2 模板处理可能造成远程代码执行。离线样例不包含利用载荷或攻击步骤，仅保留受影响版本、修复版本和原始公告链接。",
+    "url": "https://github.com/abetlen/llama-cpp-python/security/advisories/GHSA-56xg-wfcc-g829",
+    "published_at": "2024-05-10",
+    "updated_at": null,
+    "source_id": "vendor_abetlen",
+    "source_category": "vendor",
+    "kind": "vulnerability",
+    "identifiers": ["CVE-2024-34359", "GHSA-56xg-wfcc-g829"],
+    "product": "llama-cpp-python",
+    "cvss": 9.6,
+    "severity": "Critical",
+    "versions": [">= 0.2.30", "<= 0.2.71"],
+    "fixed_versions": ["0.2.72"],
+    "refs": [
+      "https://github.com/advisories/GHSA-56xg-wfcc-g829",
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-34359"
+    ],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "abetlen/llama-cpp-python Security Advisory",
+      "verified_on": "2026-09-29",
+      "cvss_version": "3.1",
+      "cvss_evidence_url": "https://github.com/abetlen/llama-cpp-python/security/advisories/GHSA-56xg-wfcc-g829"
+    }
+  },
+  {
+    "external_id": "GHSA-rvqx-wpfh-mfx7",
+    "title": "CVE-2025-3248：Langflow 未授权代码注入",
+    "summary": "Langflow 上游公告确认，1.3.0 之前的版本在代码校验端点存在未授权代码注入风险，1.3.0 为修复版本。",
+    "body": "该漏洞涉及 Langflow 的 /api/v1/validate/code 端点。上游公告描述远程且无需认证的攻击者可能通过特制请求触发代码执行；本样例不保存请求构造或利用代码。",
+    "url": "https://github.com/langflow-ai/langflow/security/advisories/GHSA-rvqx-wpfh-mfx7",
+    "published_at": "2025-06-17",
+    "updated_at": null,
+    "source_id": "vendor_langflow",
+    "source_category": "vendor",
+    "kind": "vulnerability",
+    "identifiers": ["CVE-2025-3248", "GHSA-rvqx-wpfh-mfx7"],
+    "product": "langflow",
+    "cvss": 9.3,
+    "severity": "Critical",
+    "versions": ["< 1.3.0"],
+    "fixed_versions": ["1.3.0"],
+    "refs": [
+      "https://github.com/advisories/GHSA-rvqx-wpfh-mfx7",
+      "https://github.com/langflow-ai/langflow/releases/tag/1.3.0",
+      "https://nvd.nist.gov/vuln/detail/CVE-2025-3248"
+    ],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "langflow-ai/langflow Security Advisory",
+      "verified_on": "2026-09-29",
+      "cvss_version": "4.0",
+      "cvss_evidence_url": "https://github.com/advisories/GHSA-rvqx-wpfh-mfx7",
+      "note": "9.3 为 GitHub Advisory Database 页面展示的 CVSS v4 分数，上游仓库公告页面未单列数值。"
+    }
+  },
+  {
+    "external_id": "wiz-probllama-2024-06-24",
+    "title": "Wiz Research：Probllama（CVE-2024-37032）研究分析",
+    "summary": "Wiz Research 将 Ollama 的模型摘要校验缺失与路径穿越风险联系起来，分析在特定部署条件下可能进一步导致文件覆盖与代码执行。",
+    "body": "研究文章指出，默认本地绑定会降低远程暴露风险，而对外开放的部署需要重点核查。研究团队建议升级到 Ollama 0.1.34 或更新版本，并通过认证等措施保护服务接口。其影响分析与 GitHub 公告的严重性标签应分别标注来源，不能混写成同一机构结论。",
+    "url": "https://www.wiz.io/blog/probllama-ollama-vulnerability-cve-2024-37032",
+    "published_at": "2024-06-24",
+    "updated_at": null,
+    "source_id": "research_wiz",
+    "source_category": "blog",
+    "kind": "article",
+    "identifiers": ["CVE-2024-37032"],
+    "product": "ollama",
+    "cvss": null,
+    "severity": "",
+    "versions": ["< 0.1.34"],
+    "fixed_versions": ["0.1.34"],
+    "refs": [
+      "https://github.com/advisories/GHSA-8hqg-whrw-pv92"
+    ],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "Wiz Research",
+      "verified_on": "2026-09-29",
+      "note": "研究文章与公告引用同一 CVE；研究分析中的部署条件不应外推到所有 Ollama 实例。"
+    }
+  },
+  {
+    "external_id": "arxiv:2406.13352",
+    "title": "AgentDojo：面向 LLM 智能体提示词注入攻击与防御的动态评测环境",
+    "summary": "该论文提出 AgentDojo，用于在工具返回不可信内容的场景下评估智能体的提示词注入风险与防御效果。",
+    "body": "作者公开的摘要介绍了可扩展的评测环境，并报告 97 个现实任务和 629 个安全测试案例。它为本项目设计不可信情报输入处理、工具权限边界与 Agent 防护评测提供研究背景，不是某个 CVE 的修复公告。",
+    "url": "https://arxiv.org/abs/2406.13352",
+    "published_at": "2024-06-19",
+    "updated_at": "2024-11-24",
+    "source_id": "arxiv",
+    "source_category": "paper",
+    "kind": "paper",
+    "identifiers": ["arXiv:2406.13352"],
+    "product": "",
+    "cvss": null,
+    "severity": "",
+    "versions": [],
+    "fixed_versions": [],
+    "refs": [
+      "https://doi.org/10.48550/arXiv.2406.13352",
+      "https://github.com/ethz-spylab/agentdojo"
+    ],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "arXiv",
+      "verified_on": "2026-09-29",
+      "authors": ["Edoardo Debenedetti", "Jie Zhang", "Mislav Balunović", "Luca Beurer-Kellner", "Marc Fischer", "Florian Tramèr"]
+    }
+  },
+  {
+    "external_id": "ISO-IEC-42001-2023",
+    "title": "ISO/IEC 42001:2023 人工智能管理体系标准",
+    "summary": "ISO/IEC 42001:2023 是关于建立、实施、维护和持续改进人工智能管理体系的国际标准。",
+    "body": "ISO 公开页面说明，该标准面向提供或使用 AI 产品与服务的组织，强调对 AI 风险和机会进行组织层面的持续管理。此样例仅依据 ISO 公开介绍页撰写摘要，未复制需购买的标准全文，也不将其误称为漏洞技术规范。",
+    "url": "https://www.iso.org/standard/42001",
+    "published_at": "2023-12-18",
+    "updated_at": null,
+    "source_id": "iso",
+    "source_category": "standard",
+    "kind": "standard",
+    "identifiers": ["ISO/IEC 42001:2023"],
+    "product": "",
+    "cvss": null,
+    "severity": "",
+    "versions": [],
+    "fixed_versions": [],
+    "refs": [],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "International Organization for Standardization",
+      "verified_on": "2026-09-29",
+      "access_note": "仅使用 ISO 免费公开介绍页；未收录付费标准全文。"
+    }
+  },
+  {
+    "external_id": "CAC-ORDER-15-2023",
+    "title": "《生成式人工智能服务管理暂行办法》",
+    "summary": "国家互联网信息办公室等部门公布的生成式人工智能服务管理办法，明确面向中国境内公众提供相关服务时的适用范围和基本责任。",
+    "body": "办法于 2023 年 8 月 15 日起施行。官方文本涉及合法数据来源、个人信息保护、内容安全、生成内容可靠性和安全评估等要求；具体适用性需结合服务对象与场景判断，不能据此直接认定某个软件漏洞违反了该办法。",
+    "url": "https://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm",
+    "published_at": "2023-07-13",
+    "updated_at": null,
+    "source_id": "cac",
+    "source_category": "policy",
+    "kind": "policy",
+    "identifiers": ["国家互联网信息办公室令第15号"],
+    "product": "",
+    "cvss": null,
+    "severity": "",
+    "versions": [],
+    "fixed_versions": [],
+    "refs": [],
+    "raw": {
+      "snapshot_type": "curated_summary_not_full_source",
+      "publisher": "中国网信网",
+      "verified_on": "2026-09-29",
+      "effective_date": "2023-08-15",
+      "note": "此为政策法规知识文档，不是漏洞公告或针对本系统的法律结论。"
+    }
+  }
+]

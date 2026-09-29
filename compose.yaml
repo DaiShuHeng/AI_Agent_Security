@@ -1,0 +1,13 @@
+services:
+  zhidun:
+    build: .
+    ports:
+      - "127.0.0.1:8765:8765"
+    environment:
+      COLLECT_INTERVAL_SECONDS: "1800"
+    volumes:
+      - zhidun_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  zhidun_data:

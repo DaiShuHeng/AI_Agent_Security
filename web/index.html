@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#08111f">
+  <meta name="description" content="知盾 AI 安全知识情报系统：多源监测、证据富化与可追溯问答。">
+  <title>知盾 AI · 安全知识情报系统</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.5 20 6v5.5c0 5.1-3.2 8.5-8 10-4.8-1.5-8-4.9-8-10V6l8-3.5Z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-radar" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 19 5M12 3v2M21 12h-2"/></symbol>
+    <symbol id="i-stack" viewBox="0 0 24 24"><path d="m12 2.8 9 5.1-9 5.1-9-5.1 9-5.1ZM3 12l9 5.1 9-5.1M3 16.1l9 5.1 9-5.1"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 1.7 7.2L21 11l-7.3 1.8L12 20l-1.7-7.2L3 11l7.3-1.8L12 2ZM19 18l.5 1.5L21 20l-1.5.5L19 22l-.5-1.5L17 20l1.5-.5L19 18Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 2.5 4.5 5.5 4.5 9S15 18.5 12 21c-3-2.5-4.5-5.5-4.5-9S9 5.5 12 3Z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="m12 2.8 9 4.7v9L12 21l-9-4.5v-9l9-4.7ZM3 7.5l9 4.6 9-4.6M12 12.1V21"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-7 4 14 3-7h4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M13 5h6v6M19 5l-9 9"/><path d="M19 14v5H5V5h5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m21 3-8.5 18-2.4-7.1L3 11.5 21 3ZM10.1 13.9 21 3"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2A5 5 0 0 0 12 3.9L11 5M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1-1"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="主导航">
+      <div class="brand"><div class="brand-mark"><svg><use href="#i-shield"></use></svg></div><div><strong>知盾 <span>AI</span></strong><small>SECURITY INTELLIGENCE</small></div></div>
+      <div class="workspace-label">WORKSPACE <span>·</span> CONSOLE</div>
+      <nav class="side-nav" id="mainNav">
+        <button class="nav-item active" data-nav="overview" aria-label="总览仪表盘" aria-current="page"><svg><use href="#i-grid"></use></svg><span>总览仪表盘</span><span class="nav-shortcut">01</span></button>
+        <button class="nav-item" data-nav="vulnerabilities" aria-label="漏洞情报"><svg><use href="#i-radar"></use></svg><span>漏洞情报</span><span class="nav-shortcut">02</span></button>
+        <button class="nav-item" data-nav="knowledge" aria-label="知识底座"><svg><use href="#i-stack"></use></svg><span>知识底座</span><span class="nav-shortcut">03</span></button>
+        <button class="nav-item" data-nav="assistant" aria-label="Agent 问答"><svg><use href="#i-spark"></use></svg><span>Agent 问答</span><span class="nav-shortcut">04</span></button>
+        <div class="nav-divider"></div>
+        <button class="nav-item" data-nav="sources" aria-label="数据源状态"><svg><use href="#i-globe"></use></svg><span>数据源状态</span><span class="nav-shortcut">05</span></button>
+        <button class="nav-item" data-nav="assets" aria-label="授权资产"><svg><use href="#i-box"></use></svg><span>授权资产</span><span class="nav-shortcut">06</span></button>
+        <button class="nav-item" data-nav="runs" aria-label="运行与轨迹"><svg><use href="#i-activity"></use></svg><span>运行与轨迹</span><span class="nav-shortcut">07</span></button>
+      </nav>
+      <div class="sidebar-bottom"><div class="sidebar-glow"></div><span class="mini-indicator"></span><div><strong>证据优先 · 结论可溯</strong><small>所有判断以原始来源为依据</small></div></div>
+      <div class="sidebar-foot">© 2026 ZHIDUN LAB <span>v0.1</span></div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <div class="topbar-title"><span class="eyebrow" id="sectionEyebrow">MISSION CONTROL / 01</span><h1 id="pageTitle">总览仪表盘</h1></div>
+        <div class="topbar-actions"><span class="live-status" id="serviceStatus"><span class="status-led"></span><span id="serviceStatusText">连接中</span></span><button class="icon-button" id="refreshButton" title="刷新当前页面" aria-label="刷新当前页面"><svg><use href="#i-refresh"></use></svg></button><button class="button button-ghost collect-button" data-collect="live"><svg><use href="#i-globe"></use></svg><span>在线采集</span></button><button class="button button-primary collect-button" data-collect="demo"><svg><use href="#i-radar"></use></svg><span>演示采集</span></button></div>
+      </header>
+
+      <div class="content-area">
+        <section class="page active" id="page-overview" data-page="overview" aria-label="总览仪表盘">
+          <div class="hero"><div class="hero-content"><div class="hero-kicker"><span class="hero-kicker-dot"></span> AI SECURITY INTELLIGENCE SYSTEM</div><h2>让每条安全情报<br><em>有来源、有关联、有答案。</em></h2><p>持续汇聚 AI 漏洞与安全知识，以可审计的 Agent 工作流完成富化，并将证据链带入每一次问答。</p><div class="hero-actions"><button class="button button-primary button-large" data-jump="assistant">开始情报问答 <svg><use href="#i-arrow"></use></svg></button><button class="button button-transparent button-large" data-jump="vulnerabilities">查看风险情报 <svg><use href="#i-chevron"></use></svg></button></div></div><div class="hero-art" aria-hidden="true"><div class="orbit orbit-outer"></div><div class="orbit orbit-middle"></div><div class="orbit orbit-inner"></div><div class="orbit-core"><svg><use href="#i-shield"></use></svg></div><span class="orbit-point point-a"></span><span class="orbit-point point-b"></span><span class="orbit-point point-c"></span><span class="orbit-label label-a">MONITOR</span><span class="orbit-label label-b">ENRICH</span><span class="orbit-label label-c">REASON</span></div></div>
+          <div class="section-heading stats-heading"><div><span class="eyebrow">SYSTEM PULSE</span><h2>情报态势</h2></div><span class="heading-note">统计来自当前知识库</span></div>
+          <div class="stats-grid" id="statsGrid"><div class="stat-card loading-card">正在载入统计数据…</div></div>
+          <div class="section-heading latency-heading"><div><span class="eyebrow">COLLECTION LATENCY</span><h2>采集时效</h2></div><span class="heading-note">发布至首次采集 · 缺失与负值时间戳已剔除</span></div>
+          <div class="latency-grid" id="latencyGrid"><div class="latency-card loading-card">正在载入延迟统计…</div></div>
+          <div class="overview-grid"><section class="panel panel-wide"><div class="panel-header"><div><span class="eyebrow">LATEST INTELLIGENCE</span><h3>最新漏洞情报</h3></div><button class="text-link" data-jump="vulnerabilities">查看全部 <svg><use href="#i-arrow"></use></svg></button></div><div id="overviewVulnerabilities" class="panel-body"></div></section><section class="panel"><div class="panel-header"><div><span class="eyebrow">SOURCE HEALTH</span><h3>情报源状态</h3></div><button class="text-link" data-jump="sources">来源管理 <svg><use href="#i-arrow"></use></svg></button></div><div id="overviewSources" class="panel-body"></div></section><section class="panel"><div class="panel-header"><div><span class="eyebrow">RECENT RUNS</span><h3>采集任务</h3></div><button class="text-link" data-jump="runs">运行记录 <svg><use href="#i-arrow"></use></svg></button></div><div id="overviewRuns" class="panel-body"></div></section><section class="panel panel-wide"><div class="panel-header"><div><span class="eyebrow">AGENT TIMELINE</span><h3>执行轨迹</h3></div><span class="panel-meta">最近事件</span></div><div id="overviewEvents" class="panel-body"></div></section></div>
+        </section>
+
+        <section class="page" id="page-vulnerabilities" data-page="vulnerabilities" aria-label="漏洞情报">
+          <div class="page-intro"><div><span class="eyebrow">VULNERABILITY INTELLIGENCE</span><h2>从漏洞标识，到完整的证据链。</h2><p>按风险等级和产品快速定位 AI 安全漏洞；打开详情核验来源、关系与资产匹配。</p></div><div class="intro-counter"><strong id="vulnCount">—</strong><span>已归并漏洞</span></div></div>
+          <div class="toolbar"><label class="search-field"><svg><use href="#i-search"></use></svg><input id="vulnSearch" type="search" placeholder="搜索 CVE、产品、标题…" autocomplete="off"><span class="keyboard-hint">SEARCH</span></label><label class="select-wrap"><span>风险等级</span><select id="severityFilter"><option value="">全部等级</option><option value="critical">严重</option><option value="high">高危</option><option value="medium">中危</option><option value="low">低危</option><option value="unknown">未评级</option></select></label></div>
+          <div class="panel"><div class="table-shell"><table class="data-table"><thead><tr><th>漏洞 / 事件</th><th>关联产品</th><th>风险评分</th><th>发布时间</th><th>来源</th><th><span class="sr-only">查看详情</span></th></tr></thead><tbody id="vulnTableBody"><tr><td colspan="6" class="table-empty">正在载入漏洞情报…</td></tr></tbody></table></div></div>
+        </section>
+
+        <section class="page" id="page-knowledge" data-page="knowledge" aria-label="知识底座">
+          <div class="page-intro"><div><span class="eyebrow">EVIDENCE LIBRARY</span><h2>所有结论，都从文档出发。</h2><p>漏洞公告、论文、标准与政策保留原始出处，便于追溯、复核和跨文档关联。</p></div><div class="intro-counter"><strong id="documentCount">—</strong><span>已入库文档</span></div></div>
+          <form class="toolbar" id="documentSearchForm"><label class="search-field"><svg><use href="#i-search"></use></svg><input id="documentSearch" type="search" placeholder="搜索文档标题、内容或产品…" autocomplete="off"><span class="keyboard-hint">ENTER</span></label><label class="select-wrap"><span>文档类别</span><select id="kindFilter"><option value="">全部类别</option><option value="vulnerability">漏洞情报</option><option value="paper">研究论文</option><option value="standard">技术标准</option><option value="policy">政策法规</option><option value="article">分析文章</option><option value="advisory">安全公告</option><option value="blog">研究博客</option></select></label><button type="submit" class="button button-secondary">检索证据</button></form>
+          <p class="result-note" id="documentResultNote" role="status" aria-live="polite">正在检索…</p>
+          <div class="document-grid" id="documentGrid"><div class="empty-state">正在载入文档…</div></div>
+        </section>
+
+        <section class="page" id="page-assistant" data-page="assistant" aria-label="Agent 问答">
+          <div class="assistant-layout"><div class="assistant-main"><div class="assistant-heading"><div class="assistant-avatar"><svg><use href="#i-spark"></use></svg></div><div><span class="eyebrow">EVIDENCE-AWARE AGENT</span><h2>问得深入，答得有据。</h2><p>系统检索本地情报并核验来源；模型可解释基础概念，并依据公开证据分析具体问题。</p><span class="model-availability" id="modelAvailability" role="status">正在检查模型配置 · 每次回答显示实际参与步骤</span></div><button class="button button-ghost new-session" id="newSessionButton">新建会话</button></div><div class="chat-history" id="chatHistory"><div class="welcome-card"><span class="welcome-icon"><svg><use href="#i-spark"></use></svg></span><h3>从一个安全问题开始</h3><p>可以先问“AI 安全是什么”，再深入了解漏洞机制、修复证据和资产影响。具体情报缺少证据时会明确说明。</p><div class="suggestion-list"><button class="suggestion" type="button" data-question="目前有哪些与 AI 推理框架相关的高危漏洞？">目前有哪些与 AI 推理框架相关的高危漏洞？ <svg><use href="#i-arrow"></use></svg></button><button class="suggestion" type="button" data-question="哪些已登记资产可能受到漏洞影响，依据是什么？">哪些已登记资产可能受到漏洞影响，依据是什么？ <svg><use href="#i-arrow"></use></svg></button><button class="suggestion" type="button" data-question="请给出最近漏洞的修复建议，并列出证据来源。">请给出最近漏洞的修复建议，并列出证据来源。 <svg><use href="#i-arrow"></use></svg></button></div></div></div><form class="ask-composer" id="askForm"><label for="questionInput" class="sr-only">输入安全问题</label><textarea id="questionInput" rows="2" placeholder="输入 AI 安全概念、漏洞分析或资产问题，Enter 发送，Shift+Enter 换行…" required></textarea><div class="composer-bottom"><span><svg><use href="#i-shield"></use></svg> 情报附来源 · 概念标明知识依据</span><button type="submit" class="button button-primary" id="askSubmit">发送问题 <svg><use href="#i-send"></use></svg></button></div></form></div><aside class="assistant-aside"><div class="aside-card"><span class="eyebrow">HOW IT WORKS</span><h3>三步形成可信回答</h3><ol class="workflow-list"><li><span>01</span><div><strong>理解问题</strong><small>识别漏洞、产品和分析意图</small></div></li><li><span>02</span><div><strong>检索与关联</strong><small>跨文档查询事实与关系路径</small></div></li><li><span>03</span><div><strong>证据校验</strong><small>给出出处、保留不确定性</small></div></li></ol></div><div class="aside-note"><svg><use href="#i-shield"></use></svg><p>情报并不等于确定事实。系统会区分来源陈述、关联推断和证据缺失。</p></div></aside></div>
+        </section>
+
+        <section class="page" id="page-sources" data-page="sources" aria-label="数据源状态"><div class="page-intro"><div><span class="eyebrow">COLLECTION NETWORK</span><h2>每个来源，状态透明。</h2><p>查看连接器类别、最新成功时间和错误状态。演示采集与在线采集分别记录。</p></div><div class="intro-counter"><strong id="sourceCount">—</strong><span>已登记来源</span></div></div><div class="source-summary" id="sourceSummary"></div><div class="source-grid" id="sourceGrid"><div class="empty-state">正在载入数据源…</div></div></section>
+
+        <section class="page" id="page-assets" data-page="assets" aria-label="授权资产"><div class="page-intro"><div><span class="eyebrow">AUTHORIZED INVENTORY</span><h2>只关联已授权的资产。</h2><p>导入或登记资产产品与版本，供漏洞影响范围比对；本系统不会主动扫描互联网目标。</p></div><button class="button button-primary button-large" id="addAssetButton"><svg><use href="#i-plus"></use></svg> 登记资产</button></div><div class="asset-note"><svg><use href="#i-shield"></use></svg><span>资产记录应来自团队授权范围。匹配结果属于版本推断，仍应核验官方公告。</span></div><div class="panel"><div class="table-shell"><table class="data-table"><thead><tr><th>资产名称</th><th>产品 / 组件</th><th>版本</th><th>暴露面</th><th>重要程度</th><th>负责人</th></tr></thead><tbody id="assetTableBody"><tr><td colspan="6" class="table-empty">正在载入授权资产…</td></tr></tbody></table></div></div></section>
+
+        <section class="page" id="page-runs" data-page="runs" aria-label="运行与轨迹"><div class="page-intro"><div><span class="eyebrow">AGENT OPERATIONS</span><h2>每一步执行，都可以复核。</h2><p>查看采集批次、去重数量、错误统计与 Agent 事件，定位来源故障和自动化过程；并对系统自身的 Agentic AI 安全面做可复现自检。</p></div><button class="button button-secondary" id="runsRefreshButton"><svg><use href="#i-refresh"></use></svg> 刷新记录</button></div><div class="selfcheck-shell" id="selfcheckShell"><div class="selfcheck-summary" id="selfcheckSummary"><span class="selfcheck-pending">Agent 安全自检载入中…</span></div><div class="selfcheck-grid" id="selfcheckGrid"></div></div><div class="run-grid"><section class="panel"><div class="panel-header"><div><span class="eyebrow">COLLECTION HISTORY</span><h3>采集运行记录</h3></div></div><div id="runList" class="panel-body"></div></section><section class="panel"><div class="panel-header"><div><span class="eyebrow">AGENT TRACE</span><h3>最近执行事件</h3></div></div><div id="eventList" class="panel-body"></div></section></div></section>
+      </div>
+      <footer class="main-footer"><span>知盾 AI 安全知识情报系统</span><span>证据先于结论 · 结果以实际数据为准</span></footer>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div><aside class="detail-drawer" id="detailDrawer" role="dialog" aria-modal="true" aria-label="漏洞详情" aria-hidden="true" tabindex="-1"><div class="drawer-top"><div><span class="eyebrow">INTELLIGENCE DOSSIER</span><h2>漏洞详情</h2></div><button class="icon-button" id="closeDrawerButton" aria-label="关闭详情"><svg><use href="#i-close"></use></svg></button></div><div id="detailContent" class="drawer-content"></div></aside>
+
+  <dialog id="assetDialog" class="asset-dialog"><form id="assetForm"><div class="dialog-heading"><div><span class="eyebrow">AUTHORIZED ASSET</span><h2>登记授权资产</h2><p>资产名称相同时将更新已有记录。</p></div><button type="button" class="icon-button" id="closeAssetDialog" aria-label="关闭"><svg><use href="#i-close"></use></svg></button></div><div class="form-grid"><label>资产名称 <input name="name" required maxlength="100" placeholder="例如：推理服务 A"></label><label>产品 / 组件 <input name="product" required maxlength="100" placeholder="例如：vllm"></label><label>版本 <input name="version" required maxlength="100" placeholder="例如：0.8.3"></label><label>暴露面 <select name="exposure"><option value="internal">内部网络</option><option value="internet">互联网</option><option value="isolated">隔离环境</option></select></label><label>重要程度 <select name="criticality"><option value="3">3 · 中</option><option value="1">1 · 低</option><option value="2">2 · 较低</option><option value="4">4 · 高</option><option value="5">5 · 极高</option></select></label><label>负责人 <input name="owner" maxlength="100" placeholder="例如：平台组"></label></div><div class="dialog-actions"><button type="button" class="button button-ghost" id="cancelAssetDialog">取消</button><button type="submit" class="button button-primary" id="saveAssetButton">保存资产</button></div></form></dialog>
+  <div id="toastRegion" class="toast-region" role="status" aria-live="polite"></div>
+</body>
+</html>

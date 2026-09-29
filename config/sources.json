@@ -1,0 +1,101 @@
+[
+  {
+    "id": "nvd",
+    "type": "nvd",
+    "category": "nvd",
+    "url": "https://services.nvd.nist.gov/rest/json/cves/2.0",
+    "enabled": true,
+    "keywords": ["ollama", "langflow", "langchain", "vllm", "llama-cpp-python", "huggingface", "AI model", "prompt injection"]
+  },
+  {
+    "id": "github_advisories",
+    "type": "github_advisories",
+    "category": "github_advisories",
+    "url": "https://api.github.com/advisories",
+    "enabled": true,
+    "keywords": ["ollama", "langflow", "langchain", "vllm", "llama-cpp-python", "transformers", "prompt injection", "LLM"]
+  },
+  {
+    "id": "osv_dev",
+    "type": "osv",
+    "category": "osv",
+    "url": "https://api.osv.dev/v1/query",
+    "limit": 1000,
+    "adapter_revision": "open-range-v4",
+    "enabled": true,
+    "keywords": ["ollama", "langchain", "langflow", "vllm", "llama", "AI", "LLM", "prompt injection"],
+    "packages": ["pypi:langchain", "pypi:langflow", "pypi:llama-cpp-python", "pypi:gradio", "pypi:vllm", "pypi:litellm", "pypi:transformers", "pypi:smolagents", "go:github.com/ollama/ollama", "npm:langchain"]
+  },
+  {
+    "id": "cisa_kev",
+    "type": "cisa_kev",
+    "category": "cisa_kev",
+    "url": "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+    "enabled": true,
+    "keywords": ["ollama", "langflow", "langchain", "vllm", "llama", "AI", "LLM"]
+  },
+  {
+    "id": "vendor_huggingface",
+    "type": "rss",
+    "category": "vendor",
+    "url": "https://huggingface.co/blog/feed.xml",
+    "enabled": true,
+    "keywords": ["security", "vulnerability", "attack", "prompt injection", "安全", "漏洞"]
+  },
+  {
+    "id": "community_bleepingcomputer",
+    "type": "rss",
+    "category": "community",
+    "url": "https://www.bleepingcomputer.com/feed/",
+    "enabled": true,
+    "keywords": ["ollama", "langflow", "langchain", "AI", "LLM", "prompt injection"]
+  },
+  {
+    "id": "community_anquanke",
+    "type": "rss",
+    "category": "community",
+    "url": "https://api.anquanke.com/data/v1/rss",
+    "enabled": true,
+    "keywords": ["大模型", "人工智能", "智能体", "提示词", "LLM", "AI", "模型安全"]
+  },
+  {
+    "id": "cert_cisa_advisories",
+    "type": "rss",
+    "category": "cert",
+    "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
+    "enabled": true,
+    "keywords": ["ollama", "langflow", "langchain", "AI", "LLM", "prompt injection", "artificial intelligence"]
+  },
+  {
+    "id": "paper_arxiv_cs_cr",
+    "type": "rss",
+    "category": "paper",
+    "url": "https://rss.arxiv.org/rss/cs.CR",
+    "enabled": true,
+    "keywords": ["large language model", "LLM", "prompt injection", "agent", "generative AI", "model poisoning"]
+  },
+  {
+    "id": "standards_nist",
+    "type": "rss",
+    "category": "standard",
+    "url": "https://www.nist.gov/news-events/standards/rss.xml",
+    "enabled": true,
+    "keywords": ["AI", "artificial intelligence", "security", "cybersecurity", "machine learning"]
+  },
+  {
+    "id": "policy_cac_genai",
+    "type": "static_html",
+    "category": "policy",
+    "url": "https://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm",
+    "enabled": true,
+    "keywords": ["生成式人工智能", "安全"]
+  },
+  {
+    "id": "blog_nist_cybersecurity",
+    "type": "rss",
+    "category": "blog",
+    "url": "https://www.nist.gov/blogs/cybersecurity-insights/rss.xml",
+    "enabled": true,
+    "keywords": ["AI", "artificial intelligence", "LLM", "machine learning"]
+  }
+]
