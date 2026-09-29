@@ -106,7 +106,7 @@ flowchart LR
 
 ## 4. 在线来源与配置
 
-编辑 `config/sources.json` 中每个来源的 `id`、`type`、`category`、`url`、`enabled`、`keywords`。当前连接器类型为 `nvd`、`github_advisories`、`osv`（免 key 查询 OSV.dev 的 AI 软件包公告，并按 CVSS 向量计算基础分）、`cisa_kev`、`rss`、`static_html`。应用只对配置中的公共 HTTPS 源发起有界只读请求；NVD/GitHub 可选环境变量 `NVD_API_KEY`、`GITHUB_TOKEN`，未设置时受公开服务限制（GitHub 未带 token 可能 403，OSV 源可覆盖同等公告数据）；FIRST EPSS 利用可能性查询无需 key。
+编辑 `config/sources.json` 中每个来源的 `id`、`type`、`category`、`url`、`enabled`、`keywords`。当前连接器类型为 `nvd`、`github_advisories`、`osv`（免 key 查询 OSV.dev 的 AI 软件包公告，并按 CVSS 向量计算基础分）、`cisa_kev`、`rss`、`static_html`。应用只对配置中的公共 HTTPS 源发起有界只读请求；NVD/GitHub 可选环境变量 `NVD_API_KEY`、`GITHUB_TOKEN`，未设置时受公开服务限制（GitHub 未带 token 可能 403，OSV 可补充部分软件包公告，但不保证与 GitHub Advisory 覆盖范围完全一致）；FIRST EPSS 利用可能性查询无需 key。
 
 ```bash
 python3 -m app.cli collect --source github_advisories

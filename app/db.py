@@ -255,23 +255,32 @@ class Database:
                        (utcnow(), status, *(int(counts.get(k, 0)) for k in
                          ("fetched", "inserted", "updated", "skipped", "errors")), run_id))
 
+    def run(self, run_id: int) -> dict[str, Any] | None:
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+            return dict(row) if row else None
+
     def event(self, run_id: int | None, agent: str, action: str, status: str, detail: str = "") -> None:
         with self.connect() as db:
             db.execute("INSERT INTO events(run_id,agent,action,status,detail,occurred_at) VALUES(?,?,?,?,?,?)",
                        (run_id, agent, action, status, detail[:2000], utcnow()))
 
     def add_asset(self, asset: dict[str, Any]) -> int:
-        name = str(asset["name"]).strip()
-        product = str(asset["product"]).strip().lower()
-        version = str(asset["version"]).strip()
-        if not name or not product or not version:
+        if any(not isinstance(asset.get(key), str) or not asset[key].strip()
+               for key in ("name", "product", "version")):
             raise ValueError("资产名称、产品与版本不能为空")
-        criticality = int(asset.get("criticality") or 3)
-        if not 1 <= criticality <= 5:
+        name = asset["name"].strip()
+        product = asset["product"].strip().lower()
+        version = asset["version"].strip()
+        criticality = asset.get("criticality", 3)
+        if type(criticality) is not int or not 1 <= criticality <= 5:
             raise ValueError("criticality 必须为 1 到 5")
-        exposure = str(asset.get("exposure") or "internal")
-        if exposure not in {"internet", "internal", "isolated"}:
+        exposure = asset.get("exposure", "internal")
+        if not isinstance(exposure, str) or exposure not in {"internet", "internal", "isolated"}:
             raise ValueError("exposure 必须为 internet、internal 或 isolated")
+        owner = asset.get("owner", "")
+        if not isinstance(owner, str):
+            raise ValueError("owner 必须为字符串")
         with self.connect() as db:
             cursor = db.execute("""
                 INSERT INTO assets(name,product,version,exposure,criticality,owner,created_at)
@@ -279,7 +288,7 @@ class Database:
                     version=excluded.version,exposure=excluded.exposure,
                     criticality=excluded.criticality,owner=excluded.owner
             """, (name, product, version, exposure, criticality,
-                  str(asset.get("owner", "")), utcnow()))
+                  owner, utcnow()))
             if cursor.lastrowid:
                 return int(cursor.lastrowid)
             row = db.execute("SELECT id FROM assets WHERE name=?", (name,)).fetchone()

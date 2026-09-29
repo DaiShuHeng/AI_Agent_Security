@@ -170,14 +170,45 @@ class Pipeline:
                       f"新增 {written} 条 EPSS 评分；{len(pending) - written} 个 CVE 暂无评分")
         return written
 
-    def run_live(self, selected_source: str | None = None) -> dict[str, Any]:
+    def _reserve_live(self, selected_source: str | None) -> int:
+        if selected_source is not None and (not isinstance(selected_source, str) or
+                selected_source not in {s['id'] for s in self.sources if s.get('enabled', True)}):
+            raise ValueError("未知或未启用的数据源")
         if not self._lock.acquire(blocking=False):
             raise RuntimeError("已有采集任务正在运行")
         try:
+            return self.db.create_run("live")
+        except Exception:
+            self._lock.release()
+            raise
+
+    def start_live(self, selected_source: str | None = None) -> int:
+        # Admission and run creation happen before acknowledging the HTTP request.
+        run_id = self._reserve_live(selected_source)
+        def worker():
+            try:
+                self._execute_live(run_id, selected_source)
+            except Exception:
+                LOG.exception("Background live collection failed")
+        try:
+            threading.Thread(target=worker, daemon=True, name=f"collect-{run_id}").start()
+        except Exception:
+            try:
+                self.db.finish_run(run_id, "failed", {"errors": 1})
+            finally:
+                self._lock.release()
+            raise
+        return run_id
+
+    def run_live(self, selected_source: str | None = None) -> dict[str, Any]:
+        return self._execute_live(self._reserve_live(selected_source), selected_source)
+
+    def _execute_live(self, run_id: int, selected_source: str | None) -> dict[str, Any]:
+        counts = {key: 0 for key in ("fetched", "inserted", "updated", "skipped", "errors")}
+        status = "failed"
+        try:
             from .connectors import fetch_source
 
-            run_id = self.db.create_run("live")
-            counts = {key: 0 for key in ("fetched", "inserted", "updated", "skipped", "errors")}
             cursors = {row["id"]: row["cursor"] for row in self.db.source_rows()}
             sources = [source for source in self.sources if source.get("enabled", True)
                        and (selected_source is None or source["id"] == selected_source)]
@@ -231,11 +262,12 @@ class Pipeline:
                 status = "failed"
                 self.db.event(run_id, "调度代理", "采集任务", "error", str(exc))
                 raise
-            finally:
-                self.db.finish_run(run_id, status, counts)
             return {"run_id": run_id, "status": status, **counts}
         finally:
-            self._lock.release()
+            try:
+                self.db.finish_run(run_id, status, counts)
+            finally:
+                self._lock.release()
 
 
 class Scheduler:

@@ -7,7 +7,6 @@ import json
 import logging
 import mimetypes
 import os
-import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -129,6 +128,13 @@ def make_handler(db: Database, pipeline: Pipeline, qa: AnswerEngine):
                     self._json(run_selfcheck())
                 elif path == "/api/runs":
                     self._json({"items": db.recent_runs(30), "events": db.recent_events(80)})
+                elif path.startswith("/api/runs/"):
+                    identifier = path.rsplit("/", 1)[-1]
+                    run = db.run(int(identifier)) if identifier.isascii() and identifier.isdigit() and len(identifier) < 19 else None
+                    if run is None:
+                        self._error(404, "采集任务不存在")
+                    else:
+                        self._json({"run": run})
                 elif path == "/api/assets":
                     self._json({"items": db.assets()})
                 elif path == "/metrics":
@@ -192,15 +198,8 @@ def make_handler(db: Database, pipeline: Pipeline, qa: AnswerEngine):
                         self._json(pipeline.run_demo())
                     elif mode == "live":
                         source_id = payload.get("source_id")
-                        if source_id and source_id not in {s["id"] for s in pipeline.sources}:
-                            raise ValueError("未知数据源")
-                        def run_background():
-                            try:
-                                pipeline.run_live(selected_source=source_id)
-                            except Exception:
-                                LOG.exception("Background live collection failed")
-                        threading.Thread(target=run_background, daemon=True, name="manual-collect").start()
-                        self._json({"status": "queued", "message": "在线采集已在后台启动，可在运行记录查看结果"}, 202)
+                        run_id = pipeline.start_live(selected_source=source_id)
+                        self._json({"status": "queued", "run_id": run_id, "message": "在线采集已在后台启动，可在运行记录查看结果"}, 202)
                     else:
                         raise ValueError("mode 必须为 demo 或 live")
                 else:

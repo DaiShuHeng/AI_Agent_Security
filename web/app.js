@@ -240,7 +240,7 @@ function runRow(run, compact = false) {
   }
   return append(row, element("span", `run-mode ${run.mode === "live" ? "live" : ""}`, run.mode === "live" ? "在线" : "演示"), copy);
 }
-function runStatusLabel(status) { return ({success:"成功",completed:"完成",ok:"成功",running:"运行中",partial:"部分完成",error:"失败",failed:"失败"})[String(status || "").toLowerCase()] || pick(status, "未知"); }
+function runStatusLabel(status) { return ({success:"成功",completed:"完成",ok:"成功",queued:"已排队",running:"运行中",interrupted:"已中断",partial:"部分完成",error:"失败",failed:"失败"})[String(status || "").toLowerCase()] || pick(status, "未知"); }
 function eventRow(event, compact = false) {
   const status = String(event.status || "").toLowerCase();
   const row = element("div", "event-row");
@@ -659,26 +659,38 @@ async function askQuestion(question) {
     }
   }
 }
+async function waitForCollection(runId, timeoutMs = 120_000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await new Promise(resolve => window.setTimeout(resolve, Math.min(2500, deadline - Date.now())));
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+    let result;
+    try { result = await api(`/api/runs/${runId}`, {}, Math.min(5000, remaining)); }
+    catch (error) { throw new Error(`状态查询失败，后台采集可能仍在运行：${error.message}`); }
+    if (["success", "partial", "failed", "interrupted"].includes(result.run.status)) return result.run;
+  }
+  return null;
+}
 async function collect(mode) {
   if (state.collecting) return;
   state.collecting = true;
   $$(".collect-button").forEach(button => button.disabled = true);
   toast(mode === "demo" ? "正在导入演示用公开情报快照…" : "正在连接公开来源，请等待采集完成…", "info");
   try {
-    const result = await api("/api/collect", {method:"POST",body:JSON.stringify({mode})}, mode === "live" ? 120_000 : 65_000);
+    let result = await api("/api/collect", {method:"POST",body:JSON.stringify({mode})}, mode === "live" ? 120_000 : 65_000);
     if (result.status === "queued") {
       toast(pick(result.message, "在线采集已排队，可在运行与轨迹页查看进度。"), "info");
-      for (const delay of [3000, 12000]) {
-        window.setTimeout(() => { Promise.allSettled([loadDashboard(),loadVulnerabilities(),loadRuns()]); }, delay);
-      }
+      result = await waitForCollection(result.run_id);
+      if (!result) toast("等待超过 120 秒，后台采集可能仍在运行，请到运行与轨迹页查看。", "info");
     }
-    else {
+    if (result) {
       const run = result.run || result;
       const message = `采集${runStatusLabel(pick(run.status,"完成"))}：抓取 ${count(run.fetched)}，新增 ${count(run.inserted)}，更新 ${count(run.updated)}，去重 ${count(run.skipped)}，错误 ${count(run.errors)}。`;
-      toast(message, number(run.errors) ? "info" : "success");
+      toast(message, ["failed", "interrupted"].includes(run.status) ? "error" : number(run.errors) ? "info" : "success");
     }
     await Promise.allSettled([loadDashboard(),loadVulnerabilities(),loadRuns(), ...(state.loaded.knowledge ? [loadDocuments()] : [])]);
-  } catch (error) { toast(`采集失败：${error.message}`, "error"); await Promise.allSettled([loadDashboard(),loadRuns()]); }
+  } catch (error) { toast(error.message, "error"); await Promise.allSettled([loadDashboard(),loadRuns()]); }
   finally { state.collecting = false; $$(".collect-button").forEach(button => button.disabled = false); }
 }
 function handleGlobalClick(event) {

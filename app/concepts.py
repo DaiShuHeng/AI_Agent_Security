@@ -14,15 +14,25 @@ EXPLANATION = ("是什么", "什么是", "什么意思", "解释", "介绍", "�
 FOLLOWUP = ("举个例子", "举例", "展开", "详细一点", "简单一点", "继续", "怎么防", "如何防", "它", "这个", "还有呢")
 
 
+def evidence_question(question: str) -> bool:
+    """Requests for published artifacts/sources outrank general explanation."""
+    lower = question.casefold()
+    return any(term in lower for term in (
+        "论文", "标准", "政策", "法规", "公告", "报告", "出处", "来源", "引用",
+        "paper", "standard", "policy", "report", "advisory", "source", "citation"))
+
+
 def concept_question(question: str, previous: bool = False, model_mode: str = "") -> bool:
     lower = question.lower()
+    if evidence_question(question):
+        return False
     # Definition of CVSS is allowed; a real CVE, version or dated/current query is not.
     if re.search(r"cve-\d|ghsa-|\b\d+\.\d+|\b20\d{2}\b", lower):
         return False
     if any(word in lower for word in ("最新", "今天", "目前", "最近", "修复版本", "补丁版本", "在野", "kev", "罚款", "第几条", "我的", "我们", "登记资产", "哪些漏洞", "漏洞有哪些", "高危漏洞", "漏洞列表")):
         return False
     domain = any(term in lower for term in CONCEPTS)
-    explain = any(term in lower for term in EXPLANATION)
+    explain = any(term in lower for term in EXPLANATION) or "有什么安全风险" in lower
     return (domain and (explain or model_mode == "concept")) or (
         previous and any(term in lower for term in FOLLOWUP) and not any(
             term in lower for term in ("服务器", "资产", "漏洞编号", "版本")))

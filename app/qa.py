@@ -11,7 +11,7 @@ from typing import Any
 from .db import Database
 from .intelligence import CVE_RE, GHSA_RE, asset_impacts, infer_product, product_key, related_knowledge
 from . import llm
-from .concepts import concept_question, AI_SECURITY_FALLBACK
+from .concepts import concept_question, evidence_question, AI_SECURITY_FALLBACK
 from .prompts import PROMPT_VERSION
 
 
@@ -196,6 +196,8 @@ class AnswerEngine:
             result = self._answer_concept(question, session_id, state, model_configured)
         elif canonical:
             result = self._answer_vulnerability(canonical, intents, session_id, product)
+        elif evidence_question(question):
+            result = self._answer_knowledge(question, local_intents, session_id, semantic_terms)
         elif product and high_only:
             result = self._answer_portfolio(question, local_intents, session_id,
                                             high_only=True, product_filter=product)

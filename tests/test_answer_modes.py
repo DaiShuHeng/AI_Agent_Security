@@ -21,6 +21,31 @@ class AnswerModeTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
+    def test_evidence_requests_are_not_hijacked_even_with_concept_history(self):
+        for question in ('AgentDojo 相关的提示词注入论文是什么？',
+                         '有哪些关于提示词注入的论文？', 'ISO/IEC 42001 是什么标准？',
+                         '有哪些 AI 安全政策？', '这篇安全报告是什么？', '某厂商公告是什么？'):
+            with self.subTest(question=question):
+                self.assertFalse(concept_question(question, True, 'concept'))
+        qa = AnswerEngine(self.db, allow_model=False)
+        answer = qa.ask('AgentDojo 相关的提示词注入论文是什么？')
+        self.assertFalse(answer['abstained'])
+        self.assertIn('AgentDojo', answer['answer'])
+        self.assertIn('arxiv', {c['source_id'] for c in answer['citations']})
+        with patch.object(llm, 'enabled', return_value=True), \
+             patch.object(llm, 'plan', return_value={'answer_mode':'concept','intents':[], 'search_terms':[]}), \
+             patch.object(llm, 'explain_concept') as explain, \
+             patch.object(llm, 'synthesize_evidence', return_value='基于论文的解释 [1]'):
+            online = self.qa.ask('AgentDojo 相关的提示词注入论文是什么？')
+        explain.assert_not_called()
+        self.assertFalse(online['abstained'])
+        self.assertIn('arxiv', {c['source_id'] for c in online['citations']})
+
+    def test_definitions_still_use_concept_route(self):
+        for question in ('提示词注入是什么？', 'AI 安全是什么？', 'CVSS 是什么意思？',
+                         'RAG 有什么安全风险？', 'vLLM 是什么？'):
+            self.assertTrue(concept_question(question), question)
+
     def test_screenshot_question_uses_model_explanation_without_retrieval_refusal(self):
         with patch.object(llm, 'enabled', return_value=True), \
              patch.object(llm, 'explain_concept', return_value='AI 安全涵盖模型、数据、应用和运行环境的风险。') as explain, \
