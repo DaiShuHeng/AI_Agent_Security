@@ -79,6 +79,20 @@ def _portfolio_topic(question: str) -> dict[str, Any] | None:
     return None
 
 
+def _vulnerability_overview(question: str, intents: set[str], family: dict[str, Any] | None) -> bool:
+    """A request for vulnerability findings outranks a generic source cue."""
+    if intents & {"paper", "standard", "policy"}:
+        return False
+    if family:
+        return True
+    lower = question.casefold()
+    return ("漏洞" in lower or "vulnerabilit" in lower) and any(
+        term in lower for term in (
+            "最近", "最新", "近期", "当前", "目前", "哪些", "有哪些", "列出",
+            "给出", "汇总", "盘点", "修复建议", "修复措施", "高危",
+            "recent", "latest", "list", "recommendation"))
+
+
 def _is_followup(question: str) -> bool:
     return any(marker in question for marker in FOLLOWUP_MARKERS)
 
@@ -196,6 +210,11 @@ class AnswerEngine:
             result = self._answer_concept(question, session_id, state, model_configured)
         elif canonical:
             result = self._answer_vulnerability(canonical, intents, session_id, product)
+        elif not product and _vulnerability_overview(question, local_intents, topic_family):
+            result = self._answer_portfolio(
+                question, local_intents, session_id,
+                high_only=any(word in question.lower() for word in
+                              ("高危", "高风险", "critical", "high severity")))
         elif evidence_question(question):
             result = self._answer_knowledge(question, local_intents, session_id, semantic_terms)
         elif product and high_only:
@@ -217,9 +236,10 @@ class AnswerEngine:
         model_synthesized = False
         model_ranked = result.pop("_model_ranked", False)
         skip_selection = result.pop("_skip_evidence_selection", False)
+        skip_synthesis = result.pop("_skip_evidence_synthesis", False)
         model_fallback_reason = result.pop("_model_fallback_reason", None) or model_fallback_reason
         # Public evidence only; private asset conclusions stay in the deterministic answer.
-        if (model_configured and model_plan_succeeded and not concept_mode
+        if (model_configured and model_plan_succeeded and not concept_mode and not skip_synthesis
                 and not result["abstained"] and result["citations"] and "asset" not in local_intents):
             try:
                 cards = self._public_evidence_cards(result["citations"])
@@ -532,6 +552,8 @@ class AnswerEngine:
         family = _portfolio_topic(question)
         if product_filter:
             family = {"label": product_filter, "products": [product_filter]}
+        recent_first = any(term in question.casefold() for term in
+                           ("最近", "最新", "近期", "recent", "latest"))
         family_products = {product_key(product) for product in family["products"]} if family else None
         pool = []
         while True:
@@ -541,13 +563,17 @@ class AnswerEngine:
             pool.extend(page)
             if len(page) < 500:
                 break
-        # One representative document per canonical entity: highest CVSS wins,
-        # NVD/GHSA announcements break ties over blog prose.
+        # One cited document per entity. A recent request uses publication
+        # date; other overviews continue to favour higher severity.
         best: dict[str, dict[str, Any]] = {}
         for doc in pool:
-            rank = (doc["cvss"] or 0, doc["source_id"] == "nvd")
+            rank = ((doc["published_at"] or "", doc["cvss"] or 0)
+                    if recent_first else (doc["cvss"] or 0, doc["source_id"] == "nvd"))
             current = best.get(doc["canonical_id"])
-            if current is None or rank > ((current["cvss"] or 0), current["source_id"] == "nvd"):
+            current_rank = (((current["published_at"] or "", current["cvss"] or 0)
+                             if recent_first else (current["cvss"] or 0, current["source_id"] == "nvd"))
+                            if current else None)
+            if current is None or rank > current_rank:
                 best[doc["canonical_id"]] = doc
 
         def passes_severity(doc: dict[str, Any]) -> bool:
@@ -556,7 +582,9 @@ class AnswerEngine:
             return bool({"HIGH", "CRITICAL"} & {str(doc["severity"]).upper()}) or (doc["cvss"] or 0) >= 7
 
         matched = sorted((doc for doc in best.values() if passes_severity(doc)),
-                         key=lambda doc: (doc["cvss"] or 0, doc["published_at"] or ""), reverse=True)
+                         key=(lambda doc: (doc["published_at"] or "", doc["cvss"] or 0)
+                              if recent_first else (doc["cvss"] or 0, doc["published_at"] or "")),
+                         reverse=True)
         below_threshold = len(best) - len(matched)
         if not matched:
             if best:
@@ -568,7 +596,7 @@ class AnswerEngine:
                 "本地知识库没有漏洞证据。请先执行采集，或改用具体 CVE / 产品提问。"])
 
         model_ranked, ranking_error = False, None
-        if len(matched) > 8:
+        if len(matched) > 8 and not recent_first:
             matched, model_ranked, ranking_error = self._rank_with_model(question, matched)
         # Cover distinct products even if one feed floods the newest results.
         representatives, represented = [], set()
@@ -577,7 +605,8 @@ class AnswerEngine:
                 representatives.append(doc)
                 represented.add(doc["product"])
         chosen_ids = {doc["id"] for doc in representatives}
-        shown = (representatives + [doc for doc in matched if doc["id"] not in chosen_ids])[:8]
+        shown = (matched if recent_first else
+                 representatives + [doc for doc in matched if doc["id"] not in chosen_ids])[:8]
         product_counts: dict[str, int] = {}
         for doc in matched:
             product_counts[doc["product"] or "产品待确认"] = \
@@ -586,11 +615,14 @@ class AnswerEngine:
         parts: list[str] = []
         scope_text = f"按主题「{family['label']}」过滤后，" if family else ""
         level_text = "高危" if high_only else ""
-        coverage = "、".join(f"{product}（{count} 条）" for product, count in
-                             sorted(product_counts.items(), key=lambda item: -item[1]))
+        sorted_products = sorted(product_counts.items(), key=lambda item: -item[1])
+        coverage = "、".join(f"{product}（{count} 条）" for product, count in sorted_products[:6])
+        if len(sorted_products) > 6:
+            coverage += f"等 {len(sorted_products)} 个产品"
         parts.append(f"{scope_text}本地知识库共检索到 {len(matched)} 条{level_text}漏洞证据，"
                      f"覆盖 {len(product_counts)} 个产品：{coverage}。"
-                     "以下优先覆盖不同产品，再参考相关性、CVSS 与发布时间。"
+                     + ("以下按来源发布日期从新到旧列出；‘最近’只表示已入库记录的排序，不保证实时或指定时间窗口。"
+                        if recent_first else "以下优先覆盖不同产品，再参考相关性、CVSS 与发布时间。")
                      + ("高危口径：来源标记 HIGH/CRITICAL，或 CVSS ≥ 7.0。" if high_only else ""))
         trace: list[dict[str, str]] = []
         lines: list[str] = []
@@ -600,15 +632,21 @@ class AnswerEngine:
             sentence = (f"- {canonical}（{doc['product'] or '产品待确认'}）："
                         f"{doc['severity'] or '级别未知'}，"
                         f"CVSS {doc['cvss'] if doc['cvss'] is not None else '未知'}")
+            if recent_first:
+                sentence += f"；来源发布日期 {str(doc.get('published_at') or '未知')[:10]}"
             if "fix" in local_intents:
+                affected = doc.get("versions") or []
+                if affected:
+                    sentence += f"；公告影响范围 {', '.join(dict.fromkeys(affected[:2]))}"
                 fixes = doc.get("fixed_versions") or []
                 if fixes:
                     fix_available += 1
-                    sentence += f"；修复版本 {', '.join(dict.fromkeys(fixes))}"
+                    sentence += (f"；建议核对实际部署版本，并按该来源记录升级至"
+                                 f" {', '.join(dict.fromkeys(fixes))} 后复测")
                 else:
-                    sentence += "；修复版本证据不足"
+                    sentence += "；该来源未给出明确修复版本，需核对厂商公告后制定升级方案"
             excerpt = str(doc.get("summary") or doc.get("body") or doc["title"])
-            snippet = excerpt[:260] + ("…" if len(excerpt) > 260 else "")
+            snippet = excerpt[:160] + ("…" if len(excerpt) > 160 else "")
             lines.append(sentence + f"。[{index}]\n  来源摘要：{snippet} [{index}]")
             trace.append({"from": doc["product"] or "漏洞", "via": "topic_filter+severity",
                           "to": canonical, "evidence": f"公告出处 [{index}]"})
@@ -619,6 +657,9 @@ class AnswerEngine:
         if "fix" in local_intents:
             parts.append(f"修复就绪度：本次展示的 {len(shown)} 条中 {fix_available}"
                          " 条已有明确修复版本证据，其余需按厂商公告核验。")
+            parts.append("处置建议（需结合实际部署核验）：先按上面的公开影响范围核对产品和版本；"
+                         "命中后查阅对应厂商公告，采用已确认的修复版本并复测。"
+                         "没有明确修复版本的条目，不应从受影响范围上界推断补丁版本。")
         if "asset" in local_intents:
             asset_hits: dict[str, str] = {}
             for doc in matched:
@@ -660,7 +701,8 @@ class AnswerEngine:
                      "以上仅反映本地已采集证据，并非实时全网完整清单。")
         return {"answer": "\n\n".join(parts), "citations": citations,
                 "trace": trace, "abstained": False, "_model_ranked": model_ranked,
-                "_skip_evidence_selection": True, "_model_fallback_reason": ranking_error}
+                "_skip_evidence_selection": True, "_skip_evidence_synthesis": True,
+                "_model_fallback_reason": ranking_error}
 
     def _rank_with_model(self, question: str, matched: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], bool, str | None]:
         """Optional model re-ranking of prefiltered candidates; local order on failure.

@@ -67,6 +67,45 @@ class QAQualityTests(unittest.TestCase):
         self.assertIn("0.1.34", answer["answer"])
         self.assertIn("[1]", answer["answer"])
 
+    def test_recent_vulnerability_repairs_with_sources_uses_vulnerability_evidence(self):
+        records = [
+            {**_portfolio_fixture(89001, "vllm", day=20, cvss=9.8),
+             "fixed_versions": ["2.0.1"]},
+            {**_portfolio_fixture(89002, "langflow", day=28, cvss=5.3),
+             "severity": "MEDIUM", "fixed_versions": ["2.1.0"]},
+            _portfolio_fixture(89003, "ollama", day=27, cvss=7.1),
+        ]
+        db = self._portfolio_db(records)
+        answer = AnswerEngine(db, allow_model=False).ask(
+            "请给出最近漏洞的修复建议，并列出证据来源。")
+        self.assertFalse(answer["abstained"])
+        self.assertTrue(answer["citations"])
+        self.assertEqual(answer["citations"][0]["published_at"][:10], "2026-09-28")
+        self.assertIn("CVE-2026-89002", answer["answer"])
+        self.assertIn("2.1.0", answer["answer"])
+        self.assertIn("核对厂商公告", answer["answer"])
+        self.assertIn("不保证实时", answer["answer"])
+        self.assertIn("[1]", answer["answer"])
+        self.assertTrue(all(citation["url"].startswith("https://example.invalid/")
+                            for citation in answer["citations"]))
+
+    def test_specific_paper_request_still_uses_knowledge_route(self):
+        answer = AnswerEngine(self.db, allow_model=False).ask(
+            "AgentDojo 相关的提示词注入论文有哪些？")
+        self.assertFalse(answer["abstained"])
+        self.assertIn("arxiv", {c["source_id"] for c in answer["citations"]})
+
+    def test_recent_portfolio_does_not_wait_for_unneeded_model_synthesis(self):
+        db = self._portfolio_db([_portfolio_fixture(89004, "vllm", day=28)])
+        with patch.object(llm, "enabled", return_value=True), \
+             patch.object(llm, "plan", return_value={"answer_mode": "retrieval", "intents": ["fix"],
+                                                       "search_terms": []}), \
+             patch.object(llm, "synthesize_evidence") as synthesize:
+            answer = AnswerEngine(db).ask("请给出最近漏洞的修复建议，并列出证据来源。")
+        self.assertFalse(answer["abstained"])
+        self.assertIn("planning", answer["model_role"])
+        synthesize.assert_not_called()
+
     def test_specific_unsupported_knowledge_does_not_fall_back_to_category(self):
         for question in ("欧盟 AI 政策的罚款金额是多少？", "中国人工智能模型水印标准有哪些？"):
             with self.subTest(question=question):
